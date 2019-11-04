@@ -1,0 +1,93 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration  -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
+<!--                                                                -->
+<!-- For professional support please see                            -->
+<!--    http://www.qos.ch/shop/products/professionalSupport         -->
+<!--                                                                -->
+<configuration scan="true">
+    <property name="APP" value="xxxx"/>
+    <property name="LOG_HOME" value="D:/log/${APP}"/>
+
+    <!--控制台-->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yy-MM-dd.HH:mm:ss.SSS} [%-16t] %-5p %-22c{0} %X{ServiceId} - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--详细业务日志-->
+    <appender name="DETAIL" class="ch.qos.logback.core.rolling.RollingFileAppender" additivity="false">
+        <File>${LOG_HOME}/${APP}_detail.log</File>
+        <encoder>
+            <pattern>%d{yy-MM-dd.HH:mm:ss.SSS} [%-16t] %-5p %-22c{0} %X{ServiceId} - %m%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/${APP}_detail.log.%d{yyyyMMdd}</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <!--异步输出-->
+    <appender name="ASYNC-DETAIL" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+        <queueSize>2048</queueSize>
+        <appender-ref ref="DETAIL"/>
+    </appender>
+
+    <!--错误日志-->
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender" additivity="false">
+        <File>${LOG_HOME}/${APP}_err.log</File>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yy-MM-dd.HH:mm:ss.SSS} [%-16t] %-5p %-22c{0} %X{ServiceId} - %m%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/${APP}_err.log.%d{yyyyMMdd}</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <!--RPC日志-->
+    <appender name="RPC" class="ch.qos.logback.core.rolling.RollingFileAppender" additivity="false">
+        <File>${LOG_HOME}/${APP}_rpc.log</File>
+        <encoder>
+            <pattern>%d{yy-MM-dd.HH:mm:ss.SSS} [%-16t] %-5p %-22c{0} %X{ServiceId} - %m%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/${APP}_rpc.log.%d{yyyyMMdd}</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <!--异步输出-->
+    <appender name="ASYNC-RPC" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+        <queueSize>2048</queueSize>
+        <appender-ref ref="RPC"/>
+    </appender>
+
+
+    <logger name="org.springframework" level="WARN" additivity="false"/>
+    <logger name="org.apache.httpclient.wire" level="INFO" additivity="false"/>
+    <logger name="org.apache.commons.httpclient" level="INFO" additivity="false"/>
+    <logger name="org.apache.zookeeper" level="INFO" additivity="false"/>
+
+    <!--RPC日志模块-->
+    <logger name="com.jdd.appse.appserver.integration" level="INFO">
+        <appender-ref ref="ASYNC-RPC"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC-DETAIL"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ERROR"/>
+    </root>
+
+</configuration>
